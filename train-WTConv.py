@@ -13,7 +13,7 @@ if __name__ == '__main__':
         data=r"C:\Develop\BS\Insulator_System_m\datasets\IDD_yolov11\data.yaml",
         task='detect',
         imgsz=640,
-        epochs=200,  # 改进模型建议稍微增加轮次（如150），让新模块充分收敛
+        epochs=300,  # 改进模型建议稍微增加轮次（如150），让新模块充分收敛
 
         # --- 性能优化（针对你的3060显卡和16G内存） ---
         batch=16,  # 从4调到16。4太小会导致梯度不稳定。
