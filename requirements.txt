@@ -1,0 +1,26 @@
+# --- 核心深度学习框架 ---
+ultralytics>=8.3.0
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio
+
+# --- 数据处理与数学计算 ---
+numpy>=1.23.5
+pandas
+scipy
+opencv-python>=4.6.0
+
+# --- 论文图表可视化 (针对 visualize_thesis_charts.py) ---
+matplotlib>=3.3.0
+seaborn>=0.11.0
+pillow
+
+# --- 改进模型常用依赖 (MSCB, WTConv, Mamba 等模型常需) ---
+einops
+timm>=0.9.0
+pyyaml
+tqdm
+
+# --- 辅助工具 ---
+tensorboard
+psutil
