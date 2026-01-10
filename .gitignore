@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# IDE
+.idea/
+*.iml
+
+# Data
+*.csv
+*.tsv
+*.xls
+*.xlsx
+*.h5
+*.db
+*.sqlite
+
+# Model files
+*.pt
+*.pth
+*.onnx
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Others
+.env
+*.bak
+*.tmp
+ultralytics/
+datasets/

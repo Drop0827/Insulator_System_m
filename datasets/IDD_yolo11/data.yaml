@@ -1,0 +1,8 @@
+# data.yaml 内部
+path: C:/Develop/BS/Insulator_System_m/datasets/IDD_yolo11
+train: train/images
+val: valid/images
+test: test/images
+
+nc: 2
+names: ['broken', 'insulator']

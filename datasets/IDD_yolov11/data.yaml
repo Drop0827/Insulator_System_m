@@ -1,0 +1,7 @@
+path: C:/Develop/BS/Insulator_System_m/datasets/IDD_yolov11
+train: train/images  # 此时这里已经包含了原始+雾化共2242张图
+val: valid/images    # 验证集保持原始清晰图，用来测最终精度
+test: test/images
+
+nc: 2
+names: ['broken', 'insulator']

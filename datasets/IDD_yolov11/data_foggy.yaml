@@ -1,0 +1,12 @@
+# data_foggy.yaml 内部
+# 根路径指向你刚生成的独立雾天验证集目录
+path: C:/Develop/BS/Insulator_System_m/datasets/IDD_yolov11/valid_foggy
+
+# 因为这个文件夹里直接就是 images 和 labels 文件夹
+# 所以这里直接写文件夹名字
+train: images
+val: images
+test: images
+
+nc: 2
+names: ['broken', 'insulator']
