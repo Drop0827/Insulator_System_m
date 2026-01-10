@@ -1,6 +1,12 @@
 # Insulator_System_m: Advanced Insulator Detection based on YOLOv11
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)[![Framework: Ultralytics](https://img.shields.io/badge/Framework-Ultralytics-red.svg)](https://github.com/ultralytics/ultralytics)
+<p align="center">
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  &nbsp;&nbsp;
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.9+-blue.svg" alt="Python 3.9+"></a>
+  &nbsp;&nbsp;
+  <a href="https://github.com/ultralytics/ultralytics"><img src="https://img.shields.io/badge/Framework-Ultralytics-red.svg" alt="Framework: Ultralytics"></a>
+</p>
 
 This repository is dedicated to insulator detection and segmentation tasks using the **YOLOv11** framework. It incorporates several state-of-the-art (SOTA) architectural improvements, including Multi-Scale Context Blocks (MSCB), Wavelet Transform Convolutions (WTConv), and Mamba-based vision encoders to enhance performance in complex power grid environments.
 
