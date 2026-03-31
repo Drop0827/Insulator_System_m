@@ -1,46 +1,30 @@
-# Python
+# Python 默认缓存
 __pycache__/
 *.py[cod]
-*.so
-*.egg
-*.egg-info/
-dist/
-build/
+*$py.class
 
-# Jupyter Notebooks
-.ipynb_checkpoints/
+# PyInstaller 打包
+*.manifest
+*.spec
 
-# VS Code
-.vscode/
-
-# IDE
-.idea/
-*.iml
-
-# Data
-*.csv
-*.tsv
-*.xls
-*.xlsx
-*.h5
-*.db
-*.sqlite
-
-# Model files
+# 数据与模型 (建议单独管理，不传 GitHub)
+datasets/
+runs/
 *.pt
-*.pth
 *.onnx
 
-# Logs
-*.log
+# 报告与日志
+comparison_reports/
+tests/
+logs/
+*.csv
+*.png
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Others
-.env
-*.bak
-*.tmp
-ultralytics/
-datasets/
+# 环境与配置
+.venv/
+env/
+venv/
+ENV/
+.idea/
+.vscode/
+.gemini/

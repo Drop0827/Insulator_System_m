@@ -20,8 +20,8 @@ if __name__ == '__main__':
     torch.multiprocessing.freeze_support()
 
     # --- 配置区域：请核对路径 ---
-    baseline_path = r"runs/train/insulator_yolo11_final/weights/best.pt"
-    wtconv_path = r"runs/train/yolo11_wtconv_exp/weights/best.pt"
+    baseline_path = r"runs/train/insulator_yolo11_final/weights/insulator_yolo11_final.pt"
+    wtconv_path = r"runs/train/yolo11_WTConv_exp/weights/yolo11_WTConv_exp.pt"
 
     std_data = r"datasets/IDD_yolo11/data.yaml"  # 标准验证集
     fog_data = r"datasets/IDD_yolo11/data_foggy.yaml"  # 雾天验证集
