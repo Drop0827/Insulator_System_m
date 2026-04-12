@@ -1562,6 +1562,12 @@ def parse_model(d, ch, verbose=True):
             C2PSAMLLA,
             C3k2_MSCB1,
             C3k2_MSCB2,
+            HLFAE,
+            C2f_HLFAE,
+            C3k2_HLFAE,
+            PConv,
+            C2f_PConv,
+            C3k2_PConv,
         }
     )
     repeat_modules = frozenset(  # modules with 'repeat' arguments
@@ -1585,6 +1591,10 @@ def parse_model(d, ch, verbose=True):
             C2PSAMLLA,
             C3k2_MSCB1,
             C3k2_MSCB2,
+            C2f_HLFAE,
+            C3k2_HLFAE,
+            C2f_PConv,
+            C3k2_PConv,
         }
     )
     for i, (f, n, m, args) in enumerate(d["backbone"] + d["head"]):  # from, number, module, args
@@ -1613,7 +1623,7 @@ def parse_model(d, ch, verbose=True):
                 args.insert(2, n)  # number of repeats
                 n = 1
                 # 特殊处理：支持 M/L/X 尺度的自动切换逻辑
-            if m in (C3k2, C3k2_WTConv, C2PSAMLLA):  # <--- 在这里加入 C2PSAMLLA
+            if m in (C3k2, C3k2_WTConv, C2PSAMLLA, C3k2_HLFAE):  # <--- 在这里加入 C2PSAMLLA, C3k2_HLFAE
                 legacy = False
                 if scale in "mlx":
                     args[3] = True
