@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     # 2. 开始训练
     model.train(
-        data=r"C:\Develop\BS\Insulator_System_m\datasets\IDD_yolo11\data.yaml",
+        data=r"c:\Develop\BS\Insulator_System_m\datasets\Combined_Insulator\data.yaml",
         task='detect',
         epochs=200,
         imgsz=640,

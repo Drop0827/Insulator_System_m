@@ -10,7 +10,7 @@ if __name__ == '__main__':
     model.load('yolo11n.pt')
 
     model.train(
-        data=r"C:\Develop\BS\Insulator_System_m\datasets\IDD_yolov11\data.yaml",
+        data=r"c:\Develop\BS\Insulator_System_m\datasets\Combined_Insulator\data.yaml",
         task='detect',
         imgsz=640,
         epochs=200,  # 改进模型建议稍微增加轮次（如150），让新模块充分收敛
