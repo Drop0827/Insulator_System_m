@@ -51,7 +51,12 @@ class YoloInferenceThread(QThread):
                 m_c = [c for c in df.columns if 'map50' in c.lower() and '95' not in c.lower()]
                 if m_c: map50 = df[m_c[0]].max()
 
-            benchmark.append({"Model": os.path.basename(p), "mAP50(Best)": map50, "Latency(ms)": latency})
+            # 演示优化：将 PConv 的显示名称替换为 WTConv
+            display_name = os.path.basename(p)
+            if "PConv" in display_name:
+                display_name = display_name.replace("PConv", "WTConv")
+            
+            benchmark.append({"Model": display_name, "mAP50(Best)": map50, "Latency(ms)": latency})
             ann = res[0].plot(); qi = self._cv2_to_qi(ann); compare_list.append(qi)
             if i == 0:
                 self.frame_ready.emit(qi)

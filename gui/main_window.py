@@ -15,6 +15,13 @@ class ImagePreviewLabel(QLabel):
         super().__init__(text)
         self.orig_pixmap = QPixmap()
         self.setAlignment(Qt.AlignCenter)
+        # 核心修复：设置 SizePolicy 为 Ignored ！！！
+        # 这确保了 QLabel 不会根据其图片内容去撑开布局。
+        # 它是导致“无限放大”反馈环路的根本原因。
+        from PyQt5.QtWidgets import QSizePolicy
+        self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.setMinimumSize(10, 10) # 允许自由缩小
+        self._is_scaling = False
         
     def setPixmapWithResize(self, pixmap):
         self.orig_pixmap = pixmap
@@ -23,8 +30,13 @@ class ImagePreviewLabel(QLabel):
             
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        if hasattr(self, 'orig_pixmap') and not self.orig_pixmap.isNull():
-            super().setPixmap(self.orig_pixmap.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        if not self._is_scaling and hasattr(self, 'orig_pixmap') and not self.orig_pixmap.isNull():
+            self._is_scaling = True
+            try:
+                # 只在当前分配到的空间内缩放，由于 Policy 是 Ignored，它不会反向撑大父容器
+                super().setPixmap(self.orig_pixmap.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            finally:
+                self._is_scaling = False
 
 class ClickableLabel(ImagePreviewLabel):
     clicked = pyqtSignal(QLabel)
@@ -133,9 +145,11 @@ class MainWindow(QMainWindow):
         
         self.radar_group = QGroupBox("性能指标雷达图推演区")
         radar_layout = QVBoxLayout(self.radar_group)
-        self.lbl_radar = QLabel("等待评估指标输出...")
+        self.lbl_radar = ClickableLabel("等待评估指标输出...")
         self.lbl_radar.setAlignment(Qt.AlignCenter)
-        self.lbl_radar.setStyleSheet("background-color: #f7f7f9; border: 1px solid #ccc; color: #888;")
+        self.lbl_radar.setStyleSheet("background-color: #f7f7f9; border: 1px solid #ccc; color: #888; cursor: pointer;")
+        self.lbl_radar.setCursor(Qt.PointingHandCursor)
+        self.lbl_radar.clicked.connect(self.show_large_preview)
         radar_layout.addWidget(self.lbl_radar)
         
         bottom_splitter.addWidget(self.bottom_group)
@@ -246,14 +260,14 @@ class MainWindow(QMainWindow):
     def update_radar_ui(self):
         radar_path = "comparison_reports/final_academic_comparison.png"
         if os.path.exists(radar_path):
-            self.radar_pix = QPixmap(radar_path)
-            if not self.radar_pix.isNull():
-                self.lbl_radar.setPixmap(self.radar_pix.scaled(self.lbl_radar.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            pix = QPixmap(radar_path)
+            if not pix.isNull():
+                self.lbl_radar.setPixmapWithResize(pix)
 
     def resizeEvent(self, event):
+        # 移除了 lbl_radar 的手动缩放逻辑，完全交给 ImagePreviewLabel 类内部的 resizeEvent 处理。
+        # 这样可以避免 MainWindow 与子控件之间产生尺寸反馈环路导致界面“无限膨胀”。
         super().resizeEvent(event)
-        if hasattr(self, 'radar_pix') and self.radar_pix and not self.radar_pix.isNull():
-            self.lbl_radar.setPixmap(self.radar_pix.scaled(self.lbl_radar.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
     def stop_process(self):
         if self.inference_thread: self.inference_thread.stop()

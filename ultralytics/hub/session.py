@@ -389,7 +389,7 @@ class HUBTrainingSession:
                     "For more reliable training, consider using Ultralytics HUB Cloud. "
                     "Learn more at https://docs.ultralytics.com/hub/cloud-training."
                 )
-                shutil.copy(last, weights)  # copy last.pt to insulator_yolo11_final.pt
+                shutil.copy(last, weights)  # copy last.pt to v11n_baseline.pt
             else:
                 LOGGER.warning(f"{PREFIX} Model upload issue. Missing model {weights}.")
                 return

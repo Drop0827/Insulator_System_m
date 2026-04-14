@@ -483,7 +483,7 @@ def _log_plots(experiment, trainer) -> None:
 def _log_model(experiment, trainer) -> None:
     """Log the best-trained model to Comet.ml."""
     model_name = _get_comet_model_name()
-    experiment.log_model(model_name, file_or_folder=str(trainer.best), file_name="insulator_yolo11_final.pt", overwrite=True)
+    experiment.log_model(model_name, file_or_folder=str(trainer.best), file_name="v11n_baseline.pt", overwrite=True)
 
 
 def _log_image_batches(experiment, trainer, curr_step: int) -> None:

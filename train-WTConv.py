@@ -5,7 +5,7 @@ from ultralytics import YOLO
 
 if __name__ == '__main__':
     # 1. 加载改进后的网络结构
-    model = YOLO('yolo11-C3k2-WTConv.yaml')
+    model = YOLO('yolo11-C3k2-WTConv-P2.yaml')
 
     model.load('yolo11n.pt')
 
@@ -16,7 +16,7 @@ if __name__ == '__main__':
         epochs=200,  # 使用恢复大部分预训练权重的结构后，150轮足够收敛
 
         # --- 性能优化（针对你的3060显卡和16G内存） ---
-        batch=32,  # 从4调到16。4太小会导致梯度不稳定。
+        batch=16,  # 加入 P2 头后显存压力增大，从 32 降到 16 比较保险
         cache=False,  # 必须为False！你的内存只有16G，开启后会导致磁盘100%卡死。
         workers=4,  # Windows建议设为4，平衡CPU和磁盘读取。
 
@@ -27,5 +27,5 @@ if __name__ == '__main__':
         cos_lr=True,  # 余弦退火学习率：后期 lr 平滑衰减，帮助新模块权重走出局部最优
 
         project='runs/train',
-        name='yolo11_WTConv_exp',  # 明确命名，方便后续和 Baseline 对比
+        name='yolo11_WTConv_p2_exp',  # 明确命名，方便后续和 Baseline 对比
     )

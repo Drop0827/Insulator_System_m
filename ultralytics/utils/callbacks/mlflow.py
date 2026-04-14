@@ -106,7 +106,7 @@ def on_train_end(trainer):
     """Log model artifacts at the end of training."""
     if not mlflow:
         return
-    mlflow.log_artifact(str(trainer.best.parent))  # log save_dir/weights directory with insulator_yolo11_final.pt and last.pt
+    mlflow.log_artifact(str(trainer.best.parent))  # log save_dir/weights directory with v11n_baseline.pt and last.pt
     for f in trainer.save_dir.glob("*"):  # log all other files in save_dir
         if f.suffix in {".png", ".jpg", ".csv", ".pt", ".yaml"}:
             mlflow.log_artifact(str(f))

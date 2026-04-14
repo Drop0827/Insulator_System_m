@@ -46,7 +46,7 @@ def inverse_wavelet_transform(x, filters):
 
 
 class WTConv2d(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size=5, stride=1, bias=True, wt_levels=1, wt_type='db1'):
+    def __init__(self, in_channels, out_channels, kernel_size=5, stride=1, bias=True, wt_levels=1, wt_type='db1', n_div=4):
         super(WTConv2d, self).__init__()
 
         assert in_channels == out_channels
@@ -55,41 +55,51 @@ class WTConv2d(nn.Module):
         self.wt_levels = wt_levels
         self.stride = stride
         self.dilation = 1
+        
+        # 部分卷积参数：仅对 1/n_div 的通道进行小波处理
+        self.n_div = n_div
+        self.dim_conv = in_channels // n_div
+        self.dim_untouched = in_channels - self.dim_conv
 
-        self.wt_filter, self.iwt_filter = create_wavelet_filter(wt_type, in_channels, in_channels, torch.float)
+        self.wt_filter, self.iwt_filter = create_wavelet_filter(wt_type, self.dim_conv, self.dim_conv, torch.float)
         self.wt_filter = nn.Parameter(self.wt_filter, requires_grad=False)
         self.iwt_filter = nn.Parameter(self.iwt_filter, requires_grad=False)
 
-        self.wt_function = partial(wavelet_transform, filters=self.wt_filter)
-        self.iwt_function = partial(inverse_wavelet_transform, filters=self.iwt_filter)
-
-        self.base_conv = nn.Conv2d(in_channels, in_channels, kernel_size, padding='same', stride=1, dilation=1,
-                                   groups=in_channels, bias=bias)
-        self.base_scale = _ScaleModule([1, in_channels, 1, 1])
+        self.base_conv = nn.Conv2d(self.dim_conv, self.dim_conv, kernel_size, padding='same', stride=1, dilation=1,
+                                   groups=self.dim_conv, bias=bias)
+        self.base_scale = _ScaleModule([1, self.dim_conv, 1, 1])
 
         self.wavelet_convs = nn.ModuleList(
-            [nn.Conv2d(in_channels * 4, in_channels * 4, kernel_size, padding='same', stride=1, dilation=1,
-                       groups=in_channels * 4, bias=False) for _ in range(self.wt_levels)]
+            [nn.Conv2d(self.dim_conv * 4, self.dim_conv * 4, kernel_size, padding='same', stride=1, dilation=1,
+                       groups=self.dim_conv * 4, bias=False) for _ in range(self.wt_levels)]
         )
         self.wavelet_scale = nn.ModuleList(
-            [_ScaleModule([1, in_channels * 4, 1, 1], init_scale=0.1) for _ in range(self.wt_levels)]
+            [_ScaleModule([1, self.dim_conv * 4, 1, 1], init_scale=0.1) for _ in range(self.wt_levels)]
         )
 
         if self.stride > 1:
-            self.stride_filter = nn.Parameter(torch.ones(in_channels, 1, 1, 1), requires_grad=False)
-            self.do_stride = lambda x_in: F.conv2d(x_in, self.stride_filter, bias=None, stride=self.stride,
-                                                   groups=in_channels)
+            self.stride_filter = nn.Parameter(torch.ones(self.dim_conv, 1, 1, 1), requires_grad=False)
         else:
-            self.do_stride = None
+            self.stride_filter = None
 
     def forward(self, x):
+        # 兼容性处理：如果属性丢失（通常在加载不同版本的模型时发生）
+        if not hasattr(self, 'dim_conv'):
+            # 从权重的形状中准确推导 dim_conv，这是最可靠的办法
+            # 因为 wt_filter 的输出通道数始终是 4 * dim_conv
+            self.dim_conv = self.wt_filter.shape[0] // 4
+            self.dim_untouched = x.shape[1] - self.dim_conv
+
+        # 通道切分：将输入分为参与小波变换的部分和直接传递的部分
+        x_conv, x_pass = torch.split(x, [self.dim_conv, self.dim_untouched], dim=1)
 
         x_ll_in_levels = []
         x_h_in_levels = []
         shapes_in_levels = []
 
-        curr_x_ll = x
+        curr_x_ll = x_conv
 
+        # 仅对 x_conv 进行多级小波分解与特征提取
         for i in range(self.wt_levels):
             curr_shape = curr_x_ll.shape
             shapes_in_levels.append(curr_shape)
@@ -97,7 +107,7 @@ class WTConv2d(nn.Module):
                 curr_pads = (0, curr_shape[3] % 2, 0, curr_shape[2] % 2)
                 curr_x_ll = F.pad(curr_x_ll, curr_pads)
 
-            curr_x = self.wt_function(curr_x_ll)
+            curr_x = wavelet_transform(curr_x_ll, self.wt_filter)
             curr_x_ll = curr_x[:, :, 0, :, :]
 
             shape_x = curr_x.shape
@@ -110,6 +120,7 @@ class WTConv2d(nn.Module):
 
         next_x_ll = 0
 
+        # 多级小波重建
         for i in range(self.wt_levels - 1, -1, -1):
             curr_x_ll = x_ll_in_levels.pop()
             curr_x_h = x_h_in_levels.pop()
@@ -118,20 +129,24 @@ class WTConv2d(nn.Module):
             curr_x_ll = curr_x_ll + next_x_ll
 
             curr_x = torch.cat([curr_x_ll.unsqueeze(2), curr_x_h], dim=2)
-            next_x_ll = self.iwt_function(curr_x)
+            next_x_ll = inverse_wavelet_transform(curr_x, self.iwt_filter)
 
             next_x_ll = next_x_ll[:, :, :curr_shape[2], :curr_shape[3]]
 
         x_tag = next_x_ll
-        assert len(x_ll_in_levels) == 0
 
-        x = self.base_scale(self.base_conv(x))
-        x = x + x_tag
+        # 基础卷积的分支处理
+        x_conv_processed = self.base_scale(self.base_conv(x_conv))
+        x_conv_processed = x_conv_processed + x_tag
 
-        if self.do_stride is not None:
-            x = self.do_stride(x)
+        if self.stride > 1 and self.stride_filter is not None:
+            x_conv_processed = F.conv2d(x_conv_processed, self.stride_filter, bias=None, stride=self.stride,
+                                                   groups=self.dim_conv)
+            # 如果存在 stride，x_pass 也需要降采样以匹配尺寸
+            x_pass = F.avg_pool2d(x_pass, kernel_size=self.stride, stride=self.stride)
 
-        return x
+        # 拼回原始通道
+        return torch.cat((x_conv_processed, x_pass), dim=1)
 
 
 class _ScaleModule(nn.Module):

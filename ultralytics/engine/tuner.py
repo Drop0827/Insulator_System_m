@@ -383,7 +383,7 @@ class Tuner:
                 launch = [__import__("sys").executable, "-m", "ultralytics.cfg.__init__"]  # workaround yolo not found
                 cmd = [*launch, "train", *(f"{k}={v}" for k, v in train_args.items())]
                 return_code = subprocess.run(cmd, check=True).returncode
-                ckpt_file = weights_dir / ("insulator_yolo11_final.pt" if (weights_dir / "insulator_yolo11_final.pt").exists() else "last.pt")
+                ckpt_file = weights_dir / ("v11n_baseline.pt" if (weights_dir / "v11n_baseline.pt").exists() else "last.pt")
                 metrics = torch_load(ckpt_file)["train_metrics"]
                 assert return_code == 0, "training failed"
 

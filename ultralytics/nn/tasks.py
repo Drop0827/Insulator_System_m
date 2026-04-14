@@ -1384,7 +1384,7 @@ def torch_safe_load(weight, safe_only=False):
 
     Examples:
         >>> from ultralytics.nn.tasks import torch_safe_load
-        >>> ckpt, file = torch_safe_load("path/to/insulator_yolo11_final.pt", safe_only=True)
+        >>> ckpt, file = torch_safe_load("path/to/v11n_baseline.pt", safe_only=True)
     """
     from ultralytics.utils.downloads import attempt_download_asset
 
@@ -1568,6 +1568,10 @@ def parse_model(d, ch, verbose=True):
             PConv,
             C2f_PConv,
             C3k2_PConv,
+            EMA,
+            C3k2_EMA,
+            BiLevelRoutingAttention,
+            C3k2_BiFormer,
         }
     )
     repeat_modules = frozenset(  # modules with 'repeat' arguments
@@ -1595,6 +1599,8 @@ def parse_model(d, ch, verbose=True):
             C3k2_HLFAE,
             C2f_PConv,
             C3k2_PConv,
+            C3k2_EMA,
+            C3k2_BiFormer,
         }
     )
     for i, (f, n, m, args) in enumerate(d["backbone"] + d["head"]):  # from, number, module, args
